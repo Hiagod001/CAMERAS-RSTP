@@ -1,0 +1,327 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Câmeras Uai Telecom</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+
+  <!-- LOGIN -->
+  <div id="loginScreen" class="login-screen">
+    <div class="login-card">
+      <div class="login-logo">
+        <span class="logo-icon uai-mark">ui</span>
+        <span class="logo-text">Câmeras <em>Uai Telecom</em></span>
+      </div>
+      <p class="login-sub">Sistema de Monitoramento Inteligente</p>
+      <form id="loginForm">
+        <div class="field">
+          <label>Usuário</label>
+          <input id="loginUser" placeholder="admin" value="admin" required autocomplete="username" />
+        </div>
+        <div class="field">
+          <label>Senha</label>
+          <input id="loginPass" type="password" placeholder="••••••••" value="admin123" required autocomplete="current-password" />
+        </div>
+        <button type="submit" class="btn-primary full-width">Entrar</button>
+        <div id="loginMsg" class="msg-error"></div>
+      </form>
+    </div>
+  </div>
+
+  <!-- APP -->
+  <div id="app" class="app hidden">
+
+    <aside id="sidebar" class="sidebar">
+      <div class="brand">
+        <span class="logo-icon uai-mark">ui</span>
+        <span>Câmeras <em>Uai Telecom</em></span>
+      </div>
+      <nav class="menu">
+        <button class="menu-btn active" data-view="monitor">
+          <span class="menu-icon">⬡</span> Monitoramento
+        </button>
+        <button class="menu-btn" data-view="cameras">
+          <span class="menu-icon">◎</span> Câmeras
+        </button>
+        <button class="menu-btn hidden" data-view="users" id="usersMenuBtn">
+          <span class="menu-icon">◉</span> Usuários
+        </button>
+        <button class="menu-btn" data-view="recordings">
+          <span class="menu-icon">⬭</span> Gravações
+        </button>
+        <button class="menu-btn" data-view="settings">
+          <span class="menu-icon">⊞</span> Status
+        </button>
+      </nav>
+      <div class="sidebar-footer">
+        <div class="user-info">
+          <span class="user-dot">●</span>
+          <span id="currentUser"></span><span id="currentUserRole" class="user-role"></span>
+        </div>
+        <button id="logoutBtn" class="btn-ghost">Sair</button>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div class="left-tools">
+          <button id="toggleMenuBtn" class="btn-icon" title="Toggle sidebar">☰</button>
+          <div id="topbarTitle" class="topbar-title">Câmeras Uai Telecom</div>
+        </div>
+        <div class="center-tools" id="monitorTools">
+          <select id="layoutSelect">
+            <option value="1">1 câmera</option>
+            <option value="4">2×2 — 4 câmeras</option>
+            <option value="6">3×2 — 6 câmeras</option>
+            <option value="9" selected>3×3 — 9 câmeras</option>
+            <option value="12">4×3 — 12 câmeras</option>
+            <option value="16">4×4 — 16 câmeras</option>
+          </select>
+          <button id="fullscreenBtn" class="btn-ghost" title="Tela cheia">⛶ Tela cheia</button>
+          <button id="exitFullscreenBtn" class="btn-danger hidden" title="Sair da tela cheia">✕ Sair da tela cheia</button>
+        </div>
+        <div class="right-tools">
+          <span id="statusBadge" class="badge">Carregando...</span>
+        </div>
+      </header>
+
+      <!-- MONITOR VIEW -->
+      <section id="view-monitor" class="view active">
+        <div id="cameraGrid" class="camera-grid layout-9"></div>
+      </section>
+
+      <!-- CAMERAS VIEW -->
+      <section id="view-cameras" class="view">
+        <div class="cameras-layout">
+
+          <div class="panel" id="cameraFormPanel">
+            <div class="panel-header">
+              <h2 id="formTitle">Nova Câmera</h2>
+              <button id="cancelEditBtn" class="btn-ghost hidden">✕ Cancelar edição</button>
+            </div>
+
+            <form id="cameraForm">
+              <input type="hidden" id="editCameraId" />
+
+              <div class="field">
+                <label>URL RTSP <span class="req">*</span></label>
+                <input id="camRtsp" placeholder="rtsp://usuario:senha@192.168.1.100:554/stream" required />
+              </div>
+
+              <div class="field">
+                <label>Nome da câmera</label>
+                <input id="camName" placeholder="Ex: Entrada Principal (opcional)" />
+              </div>
+
+              <div class="field-row">
+                <div class="field">
+                  <label>Transporte</label>
+                  <select id="camTransport">
+                    <option value="tcp">TCP (recomendado)</option>
+                    <option value="udp">UDP</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label>Modo de stream</label>
+                  <select id="camMode">
+                    <option value="copy">Leve (copy/H264)</option>
+                    <option value="transcode">Compatível (transcode)</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="transcode-opts" id="transcodeOpts">
+                <div class="field-row">
+                  <div class="field">
+                    <label>Largura (px)</label>
+                    <input id="camWidth" type="number" value="640" min="160" max="3840" />
+                  </div>
+                  <div class="field">
+                    <label>FPS</label>
+                    <input id="camFps" type="number" value="10" min="1" max="60" />
+                  </div>
+                </div>
+              </div>
+
+              <label class="checkbox-label">
+                <input id="camEnabled" type="checkbox" checked />
+                <span class="checkmark"></span>
+                Ativar câmera imediatamente
+              </label>
+
+              <div class="form-actions">
+                <button type="submit" class="btn-primary" id="formSubmitBtn">+ Cadastrar câmera</button>
+                <button type="button" id="testNewCamBtn" class="btn-ghost">Testar RTSP</button>
+              </div>
+              <div id="formMsg" class="msg-inline"></div>
+            </form>
+
+            <div class="tip-box">
+              <strong>💡 Dica:</strong> Cole o RTSP e clique em "Testar RTSP" para verificar a conexão antes de cadastrar.
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-header">
+              <h2>Câmeras cadastradas</h2>
+              <div class="panel-header-tools">
+                <input id="camSearch" class="search-input" placeholder="Buscar..." />
+                <span id="camCount" class="count-badge">0</span>
+              </div>
+            </div>
+            <div id="cameraList" class="camera-list"></div>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- USERS VIEW -->
+      <section id="view-users" class="view">
+        <div class="cameras-layout users-layout">
+          <div class="panel" id="userFormPanel">
+            <div class="panel-header">
+              <h2>Novo usuário</h2>
+            </div>
+            <form id="userForm">
+              <div class="field">
+                <label>Nome</label>
+                <input id="registerName" placeholder="Nome do operador" autocomplete="name" />
+              </div>
+              <div class="field">
+                <label>Usuário</label>
+                <input id="registerUser" placeholder="novo.usuario" required autocomplete="username" />
+              </div>
+              <div class="field-row">
+                <div class="field">
+                  <label>Senha</label>
+                  <input id="registerPass" type="password" placeholder="••••••••" required autocomplete="new-password" />
+                </div>
+                <div class="field">
+                  <label>Confirmar senha</label>
+                  <input id="registerPassConfirm" type="password" placeholder="••••••••" required autocomplete="new-password" />
+                </div>
+              </div>
+              <div class="field">
+                <label>Perfil</label>
+                <select id="registerRole">
+                  <option value="operator">Operador</option>
+                  <option value="admin">Administrador</option>
+                </select>
+              </div>
+              <div class="form-actions">
+                <button type="submit" class="btn-primary">+ Criar usuário</button>
+              </div>
+              <div id="registerMsg" class="msg-inline"></div>
+            </form>
+          </div>
+          <div class="panel">
+            <div class="panel-header">
+              <h2>Usuários cadastrados</h2>
+              <span id="userCount" class="count-badge">0</span>
+            </div>
+            <div id="usersList" class="camera-list"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- RECORDINGS VIEW -->
+      <section id="view-recordings" class="view">
+        <div class="panel">
+          <div class="panel-header">
+            <h2>Gravações</h2>
+            <div class="panel-header-tools">
+              <input id="recSearch" class="search-input" placeholder="Buscar gravação..." />
+              <button id="refreshRecordingsBtn" class="btn-ghost">↻ Atualizar</button>
+              <button id="deleteSelectedBtn" class="btn-danger hidden">🗑 Excluir selecionadas</button>
+            </div>
+          </div>
+
+          <div class="rec-stats" id="recStats"></div>
+
+          <div id="recordingSettingsPanel" class="panel panel-subpanel hidden">
+            <div class="panel-header"><h3>Autoexclusão de gravações</h3></div>
+            <div class="field-row">
+              <div class="field">
+                <label>Excluir arquivos mais antigos que (dias)</label>
+                <input id="retentionDays" type="number" min="1" step="1" placeholder="Ex: 2" />
+              </div>
+              <div class="field">
+                <label>&nbsp;</label>
+                <button id="saveRetentionBtn" class="btn-primary" type="button">Salvar autoexclusão</button>
+              </div>
+            </div>
+            <div id="retentionMsg" class="msg-inline"></div>
+          </div>
+
+          <div class="rec-toolbar">
+            <label class="checkbox-label small">
+              <input id="selectAllRec" type="checkbox" />
+              <span class="checkmark"></span>
+              Selecionar tudo
+            </label>
+            <div class="rec-filters">
+              <select id="recCamFilter"><option value="">Todas as câmeras</option></select>
+              <select id="recSortFilter">
+                <option value="date-desc">Mais recentes</option>
+                <option value="date-asc">Mais antigas</option>
+                <option value="size-desc">Maiores</option>
+                <option value="size-asc">Menores</option>
+              </select>
+            </div>
+          </div>
+
+          <div id="recordingsList" class="recordings-list"></div>
+        </div>
+      </section>
+
+      <!-- STATUS VIEW -->
+      <section id="view-settings" class="view">
+        <div class="settings-grid">
+          <div class="panel">
+            <h2>Status do Servidor</h2>
+            <div id="healthBox" class="health-box"></div>
+          </div>
+          <div class="panel">
+            <h2>Streams Ativos</h2>
+            <div id="streamsBox" class="streams-box"></div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- VIDEO MODAL -->
+  <div id="videoModal" class="modal-overlay hidden">
+    <div class="modal-box">
+      <div class="modal-header">
+        <span id="modalTitle" class="modal-title"></span>
+        <button id="modalClose" class="btn-icon">✕</button>
+      </div>
+      <video id="modalVideo" controls preload="metadata"></video>
+    </div>
+  </div>
+
+  <!-- CONFIRM MODAL -->
+  <div id="confirmModal" class="modal-overlay hidden">
+    <div class="modal-box small">
+      <h3 id="confirmTitle">Confirmar ação</h3>
+      <p id="confirmMsg"></p>
+      <div class="modal-footer">
+        <button id="confirmCancel" class="btn-ghost">Cancelar</button>
+        <button id="confirmOk" class="btn-danger">Confirmar</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast"></div>
+
+  <script src="/vendor/hls/hls.min.js"></script>
+  <script src="/app.js"></script>
+</body>
+</html>

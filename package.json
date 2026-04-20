@@ -1,0 +1,14 @@
+{
+  "name": "nvr-hik-lite",
+  "version": "1.0.0",
+  "description": "NVR web simples em Node.js com RTSP, HLS, login e gravação.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.21.2",
+    "express-session": "^1.18.1",
+    "hls.js": "^1.5.15"
+  }
+}

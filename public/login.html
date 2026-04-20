@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Login - NVR Simples</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body class="login-body">
+  <div class="login-card">
+    <h1>NVR Simples</h1>
+    <p>Entre para acessar as câmeras</p>
+    <form id="loginForm">
+      <input name="username" placeholder="Usuário" value="admin" required>
+      <input name="password" type="password" placeholder="Senha" value="admin123" required>
+      <button type="submit">Entrar</button>
+      <div id="loginMsg"></div>
+    </form>
+  </div>
+<script>
+const form = document.getElementById('loginForm');
+form.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const data = Object.fromEntries(new FormData(form).entries());
+  const res = await fetch('/api/login', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(data)});
+  const msg = document.getElementById('loginMsg');
+  const json = await res.json().catch(()=>({error:'Erro'}));
+  if (res.ok) location.href = '/';
+  else msg.textContent = json.error || 'Falha no login';
+});
+</script>
+</body>
+</html>
